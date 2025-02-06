@@ -1,0 +1,30 @@
+export enum ConfigKeys {
+  // Server
+  NODE_ENV = 'NODE_ENV',
+  PORT = 'PORT',
+
+  // Database
+  DB_HOST = 'DB_HOST',
+  DB_PORT = 'DB_PORT',
+  DB_NAME = 'DB_NAME',
+  DB_USER = 'DB_USER',
+  DB_PASSWORD = 'DB_PASSWORD',
+
+  // JWT
+  JWT_SECRET = 'JWT_SECRET',
+  JWT_EXPIRES_IN = 'JWT_EXPIRES_IN',
+
+  // Rate Limiting
+  RATE_LIMIT_WINDOW_MS = 'RATE_LIMIT_WINDOW_MS',
+  RATE_LIMIT_MAX_REQUESTS = 'RATE_LIMIT_MAX_REQUESTS',
+
+  // Logging
+  LOG_LEVEL = 'LOG_LEVEL',
+
+  // CORS
+  CORS_ORIGIN = 'CORS_ORIGIN',
+
+  // User Service
+  USER_SERVICE_URL = 'USER_SERVICE_URL',
+  USER_SERVICE_API_KEY = 'USER_SERVICE_API_KEY'
+} 

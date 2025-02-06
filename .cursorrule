@@ -1,0 +1,256 @@
+Generate a complete Node.js project structure for an "Event Management Service API" using TypeScript, Express.js, and PostgreSQL with an ORM (e.g., Sequelize). The service should allow users to create, manage, and participate in events while following a Test-Driven Development (TDD) approach. Implement strong type safety using TypeScript interfaces and a dedicated types module.
+
+### **API Functionalities**
+
+1. **Create an Event** (`POST /api/events`):
+   - Creates a new event.
+   - Requires `userId`, `title`, `description`, `categoryId`, `location`, and `eventDate`.
+
+2. **Get All Events** (`GET /api/events`):
+   - Retrieves all events with pagination support.
+   - Supports filtering by category, date, and location.
+
+3. **Get a Single Event** (`GET /api/events/:eventId`):
+   - Retrieves a specific event along with its details and participants.
+
+4. **Update an Event** (`PUT /api/events/:eventId`):
+   - Updates an existing event (only the creator can modify it).
+
+5. **Delete an Event** (`DELETE /api/events/:eventId`):
+   - Deletes an event (only if the authenticated user is the creator).
+
+6. **Join an Event** (`POST /api/events/:eventId/join`):
+   - Allows a user to join an event.
+   - Prevents duplicate participation.
+
+7. **Leave an Event** (`DELETE /api/events/:eventId/leave`):
+   - Allows a user to leave an event they previously joined.
+
+8. **Get Event Participants** (`GET /api/events/:eventId/participants`):
+   - Retrieves a list of users attending a specific event.
+
+### **Database Schema**
+
+#### **Events Table**
+```sql
+CREATE TABLE events (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(100) NOT NULL,
+    description TEXT,
+    category_id INT REFERENCES categories(id),
+    location GEOGRAPHY(POINT),
+    event_date TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### **Event Participants Table**
+```sql
+CREATE TABLE event_participants (
+    id SERIAL PRIMARY KEY,
+    event_id INT NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(event_id, user_id)
+);
+```
+
+#### **Categories Table**
+```sql
+CREATE TABLE categories (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    description TEXT
+);
+```
+
+### **Requirements**
+
+- Use **TypeScript** for type safety.
+- Implement **Express.js** for REST API endpoints.
+- Use **PostgreSQL** as the database with Sequelize as the ORM.
+- Follow **Test-Driven Development (TDD)**:
+  - Write unit and integration tests before implementing functionalities.
+  - Use Jest and Supertest for testing.
+- Follow **best practices for project structure**:
+  - **Controller-Service-Repository Pattern**:
+    - **Controller:** Handles HTTP requests and responses.
+    - **Service:** Contains business logic.
+    - **Repository:** Interfaces with the database.
+- Implement strong typing using TypeScript interfaces.
+- Maintain all reusable types in a dedicated `types/` directory.
+- Include input validation using a validation library (e.g., Joi).
+- Implement JWT-based authentication middleware.
+- Include error handling for database, authentication, and validation issues.
+
+### **File Structure**
+
+1. **`src`**
+    - `controllers/`: API controllers.
+    - `services/`: Business logic layer.
+    - `repositories/`: Database interaction layer.
+    - `models/`: Sequelize models for database tables.
+    - `routes/`: API route definitions.
+    - `middlewares/`: Custom middleware (e.g., JWT authentication, validation).
+    - `utils/`: Utility functions.
+    - `types/`: TypeScript types and interfaces.
+    - `config/`: Configuration files (e.g., database connection, environment variables).
+    - `tests/`: Unit and integration tests.
+
+### **Code Examples**
+
+#### **1. Example Type Definitions: `types/event.ts`**
+```typescript
+export interface Event {
+    id?: number;
+    userId: number;
+    title: string;
+    description?: string;
+    categoryId?: number;
+    location: string;
+    eventDate: Date;
+    createdAt?: Date;
+}
+```
+
+#### **2. Example Controller: `EventController.ts`**
+```typescript
+import { Request, Response, NextFunction } from 'express';
+import EventService from '../services/EventService';
+
+export const createEvent = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const event = await EventService.createEvent(req.body);
+        res.status(201).json({ event });
+    } catch (error) {
+        next(error);
+    }
+};
+```
+
+#### **3. Example Service: `EventService.ts`**
+```typescript
+import EventRepository from '../repositories/EventRepository';
+import { Event } from '../types/event';
+
+export const createEvent = async (eventData: Event): Promise<Event> => {
+    if (!eventData.userId || !eventData.title || !eventData.eventDate) {
+        throw new Error('Invalid input');
+    }
+    return await EventRepository.createEvent(eventData);
+};
+```
+
+#### **4. Example Repository: `EventRepository.ts`**
+```typescript
+import { Event } from '../types/event';
+import { EventModel } from '../models';
+
+export const createEvent = async (eventData: Event): Promise<Event> => {
+    return await EventModel.create(eventData);
+};
+```
+
+### **Testing Implementation**
+
+- Use **Jest** and **Supertest** for unit and integration tests.
+- Write tests before implementing new features.
+
+#### **Example Test Case: `tests/EventService.test.ts`**
+```typescript
+import { createEvent } from '../src/services/EventService';
+
+test('Should create an event successfully', async () => {
+    const event = await createEvent({
+        userId: 1,
+        title: 'Tech Meetup',
+        description: 'A networking event for developers.',
+        location: 'New York',
+        eventDate: new Date(),
+    });
+    expect(event).toHaveProperty('id');
+});
+```
+
+### **Environment Variables**
+- Configure `.env` file for sensitive information:
+  - `DATABASE_URL`: PostgreSQL connection string.
+  - `JWT_SECRET`: Secret key for JWT authentication.
+  - `PORT`: Application port.
+
+### **Output**
+1. A well-structured Node.js + TypeScript project for the event management service.
+2. Full implementation of RESTful APIs for event creation, updates, and participation.
+3. Strong type safety using TypeScript interfaces.
+4. Test-Driven Development approach with Jest and Supertest.
+5. Example database schema and Sequelize models.
+6. JWT-based authentication middleware.
+7. Unit and integration tests for key functionalities.
+8. Proper error handling and input validation.
+
+Generate project components and implement changes based on these guidelines.
+
+
+bu event servisi user servisi ile iletişim kuracak.
+bu yüzden event servisinde user servisini kullanacaksın.
+aşağıya yazacağım apiler user servisinde olacak.
+sen sadece user servisinde ne var onu gör. 
+onun kodunu yazmayacaksın.
+
+### **API Functionalities**
+
+1. **User Registration** (`POST /api/users/register`):
+   - Creates a new user account.
+   - Requires `username`, `email`, and `password` in the request body.
+
+2. **User Login** (`POST /api/users/login`):
+   - Authenticates the user and returns a JWT token.
+
+3. **Get User Profile** (`GET /api/users/:id`):
+   - Retrieves profile information of a user by their ID.
+
+4. **Update User Profile** (`PUT /api/users/:id`):
+   - Allows users to update their profile information (e.g., `username`, `bio`, `profilePicture`).
+
+5. **Follow Another User** (`POST /api/users/:id/follow`):
+   - Allows a user to follow another user.
+
+6. **Unfollow a User** (`DELETE /api/users/:id/follow`):
+   - Allows a user to unfollow another user.
+
+7. **Get Followers of a User** (`GET /api/users/:id/followers`):
+   - Retrieves a list of users following the specified user.
+
+8. **Get Following Users** (`GET /api/users/:id/following`):
+   - Retrieves a list of users whom the specified user follows.
+
+9. **Delete User Account** (`DELETE /api/users/:id`):
+   - Deletes the user account and related data.
+
+### **Database Schema**
+
+#### **Users Table**
+```sql
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    profile_picture TEXT,
+    bio TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+#### **Followers Table**
+```sql
+CREATE TABLE followers (
+    id SERIAL PRIMARY KEY,
+    follower_id INT REFERENCES users(id) ON DELETE CASCADE,
+    following_id INT REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(follower_id, following_id)
+);
+```
