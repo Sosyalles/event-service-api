@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  event-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DB_HOST=event-db
+      - DB_PORT=5432
+      - DB_NAME=event_service_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - JWT_SECRET=your_jwt_secret_key
+      - USER_SERVICE_URL=http://user-service:8080
+      - USER_SERVICE_API_KEY=your_api_key
+    depends_on:
+      event-db:
+        condition: service_healthy
+    networks:
+      - event-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  event-db:
+    image: postgis/postgis:15-3.3
+    environment:
+      - POSTGRES_DB=event_service_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - event-db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - event-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+networks:
+  event-network:
+    driver: bridge
+
+volumes:
+  event-db-data:
