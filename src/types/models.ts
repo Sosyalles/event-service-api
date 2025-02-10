@@ -37,29 +37,31 @@ export interface UserDTO {
   id: number;
   username: string;
   email: string;
-  firstName?: string;
-  lastName?: string;
   profilePicture?: string;
   bio?: string;
   createdAt: Date;
   updatedAt: Date;
-}
-
-export interface UserProfileDTO {
-  id: number;
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  profilePicture?: string;
-  bio?: string;
   followersCount: number;
   followingCount: number;
 }
 
-export interface UserAuthDTO {
-  id: number;
-  email: string;
-  roles: string[];
+export interface UserProfileDTO extends UserDTO {
   isActive: boolean;
+}
+
+export interface UserAuthDTO extends UserDTO {
+  isActive: boolean;
+}
+
+export interface UserVerificationResponse {
+  username: string;
+  userId: number;
+  email: string;
+  valid: boolean;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
 } 
