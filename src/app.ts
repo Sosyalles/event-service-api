@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import eventRoutes from './routes/event.routes';
 import categoryRoutes from './routes/category.routes';
+import healthRoutes from './routes/health.routes';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware';
 import { setupSwagger } from './config/swagger';
 import { Config } from './config/config';
@@ -20,6 +21,9 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Health check route should be before any middleware
+app.use('/', healthRoutes);
 
 // Rate limiting
 const limiter = rateLimit({
