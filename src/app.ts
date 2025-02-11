@@ -23,7 +23,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Health check route should be before any middleware
-app.use('/', healthRoutes);
+app.use('/api', healthRoutes);
 
 // Rate limiting
 const limiter = rateLimit({
